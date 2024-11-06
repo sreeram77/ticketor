@@ -22,8 +22,17 @@ message TicketIDRequest {
 message TicketReply {
   string id = 1;
   string userId = 2;
-  string name = 3;
-  string number = 4;
+  string from = 3;
+  string to = 4;
   string section = 5;
-  string price = 6;
+  string number = 6;
+  string price = 7;
+  User user = 8;
+}
+
+message User {
+  string id = 1;
+  string firstName = 2;
+  string lastName = 3;
+  string email = 4;
 }
