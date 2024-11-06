@@ -1,0 +1,29 @@
+syntax = "proto3";
+
+option go_package = "ticketor";
+
+service Ticketor {
+  rpc PurchaseTicket(TicketRequest) returns (TicketReply) {}
+  rpc GetTicket(TicketIDRequest) returns (TicketReply) {}
+  rpc RemoveUser(TicketRequest) returns (TicketReply) {}
+  rpc ModifyTicket(TicketRequest) returns (TicketReply) {}
+}
+
+message TicketRequest {
+  string userId = 1;
+  string from = 2;
+  string to = 3;
+}
+
+message TicketIDRequest {
+  string id = 1;
+}
+
+message TicketReply {
+  string id = 1;
+  string userId = 2;
+  string name = 3;
+  string number = 4;
+  string section = 5;
+  string price = 6;
+}
