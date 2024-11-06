@@ -4,7 +4,7 @@ import (
 	"log/slog"
 	"net"
 
-	"ticketor/handlers"
+	"ticketor/cmd/server/handlers"
 	protogen "ticketor/protogen/proto"
 	"ticketor/store"
 
