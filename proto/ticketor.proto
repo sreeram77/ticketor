@@ -13,6 +13,7 @@ message TicketRequest {
   string userId = 1;
   string from = 2;
   string to = 3;
+  string id = 4;
 }
 
 message TicketIDRequest {

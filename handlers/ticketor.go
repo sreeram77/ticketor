@@ -110,11 +110,50 @@ func (t *Ticketor) RemoveTicket(ctx context.Context, request *protogen.TicketIDR
 
 // ModifyTicket modifies a ticket.
 func (t *Ticketor) ModifyTicket(ctx context.Context, request *protogen.TicketRequest) (*protogen.TicketReply, error) {
-	//TODO implement me
-	panic("implement me")
+	ticket, err := t.Tickets.Get(request.GetId())
+	if err != nil {
+		return nil, err
+	}
+
+	// Deallocate existing ticket.
+	err = t.Sections.DeallocateSeat(ticket.Section, ticket.Number)
+	if err != nil {
+		return nil, err
+	}
+
+	// Allocate new seat.
+	section, seat, err := t.Sections.AllocateSeat()
+	if err != nil {
+		return nil, err
+	}
+
+	modified, err := t.Tickets.Modify(request.GetId(), models.Ticket{
+		ID:      request.GetId(),
+		From:    request.GetFrom(),
+		To:      request.GetTo(),
+		UserID:  ticket.UserID,
+		Section: section,
+		Number:  seat,
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	return &protogen.TicketReply{
+		Id:      modified.ID,
+		UserId:  modified.UserID,
+		From:    modified.From,
+		To:      modified.To,
+		Section: modified.Section,
+		Number:  modified.Number,
+		Price:   modified.Price.String(),
+		User: &protogen.User{
+			Id:        modified.User.ID,
+			FirstName: modified.User.FirstName,
+			LastName:  modified.User.LastName,
+			Email:     modified.User.Email,
+		},
+	}, nil
 }
 
-func (t *Ticketor) mustEmbedUnimplementedTicketorServer() {
-	//TODO implement me
-	panic("implement me")
-}
+func (t *Ticketor) mustEmbedUnimplementedTicketorServer() {}
