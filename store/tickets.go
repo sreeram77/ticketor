@@ -29,6 +29,14 @@ func NewTickets() Tickets {
 
 // Create creates a new ticket.
 func (t *tickets) Create(ticket models.Ticket) (models.Ticket, error) {
+	if !t.checkDestinationExists(ticket.To) || !t.checkDestinationExists(ticket.From) {
+		return models.Ticket{}, errors.ErrNotFound
+	}
+
+	if ticket.From == ticket.To {
+		return models.Ticket{}, errors.ErrInvalid
+	}
+
 	id, err := uuid.NewV7()
 	if err != nil {
 		return models.Ticket{}, err
@@ -74,4 +82,11 @@ func (t *tickets) Modify(id string, ticket models.Ticket) (models.Ticket, error)
 func (t *tickets) GetBySection(id string) ([]models.Ticket, error) {
 	//TODO implement me
 	panic("implement me")
+}
+
+// checkDestinationExists checks if a destination exists.
+func (t *tickets) checkDestinationExists(destination string) bool {
+	_, exists := t.destinations[destination]
+
+	return exists
 }
