@@ -3,6 +3,7 @@ package handlers
 import (
 	"context"
 
+	"ticketor/models"
 	protogen "ticketor/protogen/proto"
 	"ticketor/store"
 )
@@ -24,27 +25,82 @@ func NewTicketor(users store.Users, sections store.Sections, tickets store.Ticke
 	}
 }
 
+// PurchaseTicket creates a new ticket.
 func (t *Ticketor) PurchaseTicket(ctx context.Context, request *protogen.TicketRequest) (*protogen.TicketReply, error) {
-	//TODO implement me
-	panic("implement me")
+	user, err := t.Users.Get(request.UserId)
+	if err != nil {
+		return nil, err
+	}
+
+	section, seat, err := t.Sections.AllocateSeat()
+	if err != nil {
+		return nil, err
+	}
+
+	created, err := t.Tickets.Create(models.Ticket{
+		From:    request.From,
+		To:      request.To,
+		UserID:  request.UserId,
+		Section: section,
+		Number:  seat,
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	return &protogen.TicketReply{
+		Id:     created.ID,
+		UserId: user.ID,
+		User: &protogen.User{
+			Id:        user.ID,
+			FirstName: user.FirstName,
+			LastName:  user.LastName,
+			Email:     user.Email,
+		},
+		Number:  created.Number,
+		Section: created.Number,
+		From:    created.From,
+		To:      created.To,
+		Price:   created.Price.String(),
+	}, nil
 }
 
+// GetTicket fetches a ticket by ID.
 func (t *Ticketor) GetTicket(ctx context.Context, request *protogen.TicketIDRequest) (*protogen.TicketReply, error) {
+	ticket, err := t.Tickets.Get(request.Id)
+	if err != nil {
+		return nil, err
+	}
+
+	user, err := t.Users.Get(ticket.UserID)
+	if err != nil {
+		return nil, err
+	}
+
+	return &protogen.TicketReply{
+		Id:      ticket.ID,
+		UserId:  user.ID,
+		Number:  ticket.Number,
+		Section: ticket.Section,
+		From:    ticket.From,
+		To:      ticket.To,
+		Price:   ticket.Price.String(),
+	}, nil
+}
+
+// RemoveTicket deletes a ticket.
+func (t *Ticketor) RemoveTicket(ctx context.Context, request *protogen.TicketRequest) (*protogen.TicketReply, error) {
 	//TODO implement me
 	panic("implement me")
 }
 
-func (t *Ticketor) RemoveUser(ctx context.Context, request *protogen.TicketRequest) (*protogen.TicketReply, error) {
-	//TODO implement me
-	panic("implement me")
-}
-
+// ModifyTicket modifies a ticket.
 func (t *Ticketor) ModifyTicket(ctx context.Context, request *protogen.TicketRequest) (*protogen.TicketReply, error) {
 	//TODO implement me
 	panic("implement me")
 }
 
-func (t Ticketor) mustEmbedUnimplementedTicketorServer() {
+func (t *Ticketor) mustEmbedUnimplementedTicketorServer() {
 	//TODO implement me
 	panic("implement me")
 }
