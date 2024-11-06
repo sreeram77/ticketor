@@ -1,8 +1,7 @@
 package store
 
 import (
-	"errors"
-
+	"ticketor/errors"
 	"ticketor/models"
 
 	"github.com/google/uuid"
