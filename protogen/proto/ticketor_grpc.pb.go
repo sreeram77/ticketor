@@ -21,7 +21,7 @@ const _ = grpc.SupportPackageIsVersion9
 const (
 	Ticketor_PurchaseTicket_FullMethodName = "/Ticketor/PurchaseTicket"
 	Ticketor_GetTicket_FullMethodName      = "/Ticketor/GetTicket"
-	Ticketor_RemoveUser_FullMethodName     = "/Ticketor/RemoveUser"
+	Ticketor_RemoveTicket_FullMethodName   = "/Ticketor/RemoveTicket"
 	Ticketor_ModifyTicket_FullMethodName   = "/Ticketor/ModifyTicket"
 )
 
@@ -31,7 +31,7 @@ const (
 type TicketorClient interface {
 	PurchaseTicket(ctx context.Context, in *TicketRequest, opts ...grpc.CallOption) (*TicketReply, error)
 	GetTicket(ctx context.Context, in *TicketIDRequest, opts ...grpc.CallOption) (*TicketReply, error)
-	RemoveUser(ctx context.Context, in *TicketRequest, opts ...grpc.CallOption) (*TicketReply, error)
+	RemoveTicket(ctx context.Context, in *TicketRequest, opts ...grpc.CallOption) (*TicketReply, error)
 	ModifyTicket(ctx context.Context, in *TicketRequest, opts ...grpc.CallOption) (*TicketReply, error)
 }
 
@@ -63,10 +63,10 @@ func (c *ticketorClient) GetTicket(ctx context.Context, in *TicketIDRequest, opt
 	return out, nil
 }
 
-func (c *ticketorClient) RemoveUser(ctx context.Context, in *TicketRequest, opts ...grpc.CallOption) (*TicketReply, error) {
+func (c *ticketorClient) RemoveTicket(ctx context.Context, in *TicketRequest, opts ...grpc.CallOption) (*TicketReply, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
 	out := new(TicketReply)
-	err := c.cc.Invoke(ctx, Ticketor_RemoveUser_FullMethodName, in, out, cOpts...)
+	err := c.cc.Invoke(ctx, Ticketor_RemoveTicket_FullMethodName, in, out, cOpts...)
 	if err != nil {
 		return nil, err
 	}
@@ -89,7 +89,7 @@ func (c *ticketorClient) ModifyTicket(ctx context.Context, in *TicketRequest, op
 type TicketorServer interface {
 	PurchaseTicket(context.Context, *TicketRequest) (*TicketReply, error)
 	GetTicket(context.Context, *TicketIDRequest) (*TicketReply, error)
-	RemoveUser(context.Context, *TicketRequest) (*TicketReply, error)
+	RemoveTicket(context.Context, *TicketRequest) (*TicketReply, error)
 	ModifyTicket(context.Context, *TicketRequest) (*TicketReply, error)
 	mustEmbedUnimplementedTicketorServer()
 }
@@ -107,8 +107,8 @@ func (UnimplementedTicketorServer) PurchaseTicket(context.Context, *TicketReques
 func (UnimplementedTicketorServer) GetTicket(context.Context, *TicketIDRequest) (*TicketReply, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetTicket not implemented")
 }
-func (UnimplementedTicketorServer) RemoveUser(context.Context, *TicketRequest) (*TicketReply, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method RemoveUser not implemented")
+func (UnimplementedTicketorServer) RemoveTicket(context.Context, *TicketRequest) (*TicketReply, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method RemoveTicket not implemented")
 }
 func (UnimplementedTicketorServer) ModifyTicket(context.Context, *TicketRequest) (*TicketReply, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method ModifyTicket not implemented")
@@ -170,20 +170,20 @@ func _Ticketor_GetTicket_Handler(srv interface{}, ctx context.Context, dec func(
 	return interceptor(ctx, in, info, handler)
 }
 
-func _Ticketor_RemoveUser_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+func _Ticketor_RemoveTicket_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(TicketRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(TicketorServer).RemoveUser(ctx, in)
+		return srv.(TicketorServer).RemoveTicket(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: Ticketor_RemoveUser_FullMethodName,
+		FullMethod: Ticketor_RemoveTicket_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(TicketorServer).RemoveUser(ctx, req.(*TicketRequest))
+		return srv.(TicketorServer).RemoveTicket(ctx, req.(*TicketRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -222,8 +222,8 @@ var Ticketor_ServiceDesc = grpc.ServiceDesc{
 			Handler:    _Ticketor_GetTicket_Handler,
 		},
 		{
-			MethodName: "RemoveUser",
-			Handler:    _Ticketor_RemoveUser_Handler,
+			MethodName: "RemoveTicket",
+			Handler:    _Ticketor_RemoveTicket_Handler,
 		},
 		{
 			MethodName: "ModifyTicket",
