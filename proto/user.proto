@@ -1,0 +1,21 @@
+syntax = "proto3";
+
+option go_package = "github.com/sreeram77/protogen";
+
+message UserResponse {
+  string id = 1;
+  string firstName = 2;
+  string lastName = 3;
+  string email = 4;
+}
+
+message UserRequest {
+  string firstName = 2;
+  string lastName = 3;
+  string email = 4;
+}
+
+service User {
+  rpc Get(UserRequest) returns (UserResponse) {}
+  rpc Create(UserRequest) returns (UserResponse) {}
+}
