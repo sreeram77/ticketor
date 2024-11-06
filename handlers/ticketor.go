@@ -27,7 +27,7 @@ func NewTicketor(users store.Users, sections store.Sections, tickets store.Ticke
 
 // PurchaseTicket creates a new ticket.
 func (t *Ticketor) PurchaseTicket(ctx context.Context, request *protogen.TicketRequest) (*protogen.TicketReply, error) {
-	user, err := t.Users.Get(request.UserId)
+	user, err := t.Users.Get(request.GetUserId())
 	if err != nil {
 		return nil, err
 	}
@@ -38,9 +38,9 @@ func (t *Ticketor) PurchaseTicket(ctx context.Context, request *protogen.TicketR
 	}
 
 	created, err := t.Tickets.Create(models.Ticket{
-		From:    request.From,
-		To:      request.To,
-		UserID:  request.UserId,
+		From:    request.GetFrom(),
+		To:      request.GetTo(),
+		UserID:  request.GetUserId(),
 		Section: section,
 		Number:  seat,
 	})
@@ -67,7 +67,7 @@ func (t *Ticketor) PurchaseTicket(ctx context.Context, request *protogen.TicketR
 
 // GetTicket fetches a ticket by ID.
 func (t *Ticketor) GetTicket(ctx context.Context, request *protogen.TicketIDRequest) (*protogen.TicketReply, error) {
-	ticket, err := t.Tickets.Get(request.Id)
+	ticket, err := t.Tickets.Get(request.GetId())
 	if err != nil {
 		return nil, err
 	}
@@ -89,9 +89,23 @@ func (t *Ticketor) GetTicket(ctx context.Context, request *protogen.TicketIDRequ
 }
 
 // RemoveTicket deletes a ticket.
-func (t *Ticketor) RemoveTicket(ctx context.Context, request *protogen.TicketRequest) (*protogen.TicketReply, error) {
-	//TODO implement me
-	panic("implement me")
+func (t *Ticketor) RemoveTicket(ctx context.Context, request *protogen.TicketIDRequest) (*protogen.Empty, error) {
+	ticket, err := t.Tickets.Get(request.GetId())
+	if err != nil {
+		return nil, err
+	}
+
+	err = t.Sections.DeallocateSeat(ticket.Section, ticket.Number)
+	if err != nil {
+		return nil, err
+	}
+
+	err = t.Tickets.Remove(request.GetId())
+	if err != nil {
+		return nil, err
+	}
+
+	return &protogen.Empty{}, nil
 }
 
 // ModifyTicket modifies a ticket.
