@@ -61,3 +61,9 @@ func (t *tickets) Modify(id string, ticket models.Ticket) (models.Ticket, error)
 
 	return ticket, nil
 }
+
+// GetBySection fetches all tickets by section ID.
+func (t *tickets) GetBySection(id string) ([]models.Ticket, error) {
+	//TODO implement me
+	panic("implement me")
+}

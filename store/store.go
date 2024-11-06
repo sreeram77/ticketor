@@ -11,6 +11,7 @@ type Users interface {
 type Tickets interface {
 	Create(ticket models.Ticket) (models.Ticket, error)
 	Get(id string) (models.Ticket, error)
+	GetBySection(id string) ([]models.Ticket, error)
 	Remove(id string) error
 	Modify(id string, ticket models.Ticket) (models.Ticket, error)
 }
