@@ -1,6 +1,6 @@
 syntax = "proto3";
 
-option go_package = "ticketor";
+option go_package = "github.com/sreeram77/handlers";
 
 service Ticketor {
   rpc PurchaseTicket(TicketRequest) returns (TicketReply) {}
