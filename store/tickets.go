@@ -79,8 +79,15 @@ func (t *tickets) Modify(id string, ticket models.Ticket) (models.Ticket, error)
 
 // GetBySection fetches all tickets by section ID.
 func (t *tickets) GetBySection(id string) ([]models.Ticket, error) {
-	//TODO implement me
-	panic("implement me")
+	var res []models.Ticket
+
+	for _, v := range t.store {
+		if v.Section == id {
+			res = append(res, v)
+		}
+	}
+
+	return res, nil
 }
 
 // checkDestinationExists checks if a destination exists.
