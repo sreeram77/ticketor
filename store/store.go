@@ -1,6 +1,6 @@
 package store
 
-import "github.com/sreeram77/ticketor/models"
+import "ticketor/models"
 
 type Users interface {
 	Create(user models.User) (models.User, error)

@@ -1,6 +1,7 @@
 package store
 
 import (
+	"ticketor/errors"
 	"ticketor/models"
 
 	"github.com/google/uuid"
@@ -34,12 +35,22 @@ func (u *users) Create(user models.User) (models.User, error) {
 
 // Get fetches a user by ID.
 func (u *users) Get(id string) (models.User, error) {
-	//TODO implement me
-	panic("implement me")
+	user, ok := u.store[id]
+	if !ok {
+		return models.User{}, errors.ErrNotFound
+	}
+
+	return user, nil
 }
 
 // Remove deletes a user by ID.
 func (u *users) Remove(id string) error {
-	//TODO implement me
-	panic("implement me")
+	user, err := u.Get(id)
+	if err != nil {
+		return err
+	}
+
+	delete(u.store, user.ID)
+
+	return nil
 }
