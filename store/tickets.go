@@ -9,13 +9,21 @@ import (
 )
 
 type tickets struct {
-	store map[string]models.Ticket
+	store        map[string]models.Ticket
+	destinations map[string]struct{}
 }
 
 // NewTickets creates a new tickets store.
 func NewTickets() Tickets {
+	destinations := make(map[string]struct{})
+
+	// Populate data
+	destinations["London"] = struct{}{}
+	destinations["France"] = struct{}{}
+
 	return &tickets{
-		store: make(map[string]models.Ticket),
+		store:        make(map[string]models.Ticket),
+		destinations: destinations,
 	}
 }
 
