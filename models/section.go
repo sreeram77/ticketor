@@ -1,6 +1,6 @@
 package models
 
 type Section struct {
-	ID   string
-	Name string
+	ID     string
+	Number int
 }

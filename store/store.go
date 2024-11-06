@@ -16,6 +16,6 @@ type Tickets interface {
 	Modify(id string, ticket models.Ticket) (models.Ticket, error)
 }
 
-type Section interface {
-	Layout(id string) error
+type Sections interface {
+	Get(id string) (models.Section, error)
 }
