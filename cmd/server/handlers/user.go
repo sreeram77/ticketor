@@ -27,7 +27,7 @@ func NewUser(users store.Users) protogen.UserServiceServer {
 func (u *user) Get(ctx context.Context, request *protogen.UserIDRequest) (*protogen.UserResponse, error) {
 	fetched, err := u.store.Get(request.GetId())
 	if err != nil {
-		return nil, err
+		return nil, utils.StatusFromError(err)
 	}
 
 	return &protogen.UserResponse{
@@ -42,7 +42,7 @@ func (u *user) Get(ctx context.Context, request *protogen.UserIDRequest) (*proto
 func (u *user) Create(ctx context.Context, request *protogen.UserRequest) (*protogen.UserResponse, error) {
 	err := validateUser(request)
 	if err != nil {
-		return nil, err
+		return nil, utils.StatusFromError(err)
 	}
 
 	created, err := u.store.Create(models.User{
@@ -51,7 +51,7 @@ func (u *user) Create(ctx context.Context, request *protogen.UserRequest) (*prot
 		Email:     request.GetEmail(),
 	})
 	if err != nil {
-		return nil, err
+		return nil, utils.StatusFromError(err)
 	}
 
 	return &protogen.UserResponse{
