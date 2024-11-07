@@ -3,6 +3,7 @@ package handlers
 import (
 	"context"
 
+	"ticketor/errors"
 	"ticketor/models"
 	protogen "ticketor/protogen/proto"
 	"ticketor/store"
@@ -51,8 +52,7 @@ func (t *Ticketor) PurchaseTicket(ctx context.Context, request *protogen.TicketR
 	}
 
 	return &protogen.TicketReply{
-		Id:     created.ID,
-		UserId: fetchedUser.ID,
+		Id: created.ID,
 		User: &protogen.User{
 			Id:        fetchedUser.ID,
 			FirstName: fetchedUser.FirstName,
@@ -74,19 +74,24 @@ func (t *Ticketor) GetTicket(ctx context.Context, request *protogen.TicketIDRequ
 		return nil, utils.StatusFromError(err)
 	}
 
-	user, err := t.Users.Get(ticket.UserID)
+	fetchedUser, err := t.Users.Get(ticket.UserID)
 	if err != nil {
 		return nil, utils.StatusFromError(err)
 	}
 
 	return &protogen.TicketReply{
 		Id:      ticket.ID,
-		UserId:  user.ID,
 		Number:  ticket.Number,
 		Section: ticket.Section,
 		From:    ticket.From,
 		To:      ticket.To,
 		Price:   ticket.Price.String(),
+		User: &protogen.User{
+			Id:        fetchedUser.ID,
+			FirstName: fetchedUser.FirstName,
+			LastName:  fetchedUser.LastName,
+			Email:     fetchedUser.Email,
+		},
 	}, nil
 }
 
@@ -156,6 +161,49 @@ func (t *Ticketor) ModifyTicket(ctx context.Context, request *protogen.TicketReq
 			Email:     modified.User.Email,
 		},
 	}, nil
+}
+
+func (t *Ticketor) GetTickets(ctx context.Context, request *protogen.SectionIDRequest) (*protogen.TicketsReply, error) {
+	if request.GetId() == "" {
+		return nil, utils.StatusFromError(errors.ErrInvalid)
+	}
+
+	_, err := t.Sections.Get(request.GetId())
+	if err != nil {
+		return nil, utils.StatusFromError(err)
+	}
+
+	tickets, err := t.Tickets.GetBySection(request.GetId())
+	if err != nil {
+		return nil, utils.StatusFromError(err)
+	}
+
+	var resp []*protogen.TicketReply
+
+	for _, ticket := range tickets {
+
+		usr, err := t.Users.Get(ticket.UserID)
+		if err != nil {
+			return nil, utils.StatusFromError(err)
+		}
+
+		resp = append(resp, &protogen.TicketReply{
+			Id:      ticket.ID,
+			From:    ticket.From,
+			To:      ticket.To,
+			Section: ticket.Section,
+			Number:  ticket.Number,
+			Price:   ticket.Price.String(),
+			User: &protogen.User{
+				Id:        usr.ID,
+				FirstName: usr.FirstName,
+				LastName:  usr.LastName,
+				Email:     usr.Email,
+			},
+		})
+	}
+
+	return &protogen.TicketsReply{Tickets: resp}, nil
 }
 
 func (t *Ticketor) mustEmbedUnimplementedTicketorServer() {}
