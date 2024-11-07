@@ -19,5 +19,6 @@ type Tickets interface {
 type Sections interface {
 	Get(id string) (models.Section, error)
 	AllocateSeat() (string, string, error)
+	ReallocateSeat(section, seat string) (string, string, error)
 	DeallocateSeat(section, seat string) error
 }

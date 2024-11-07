@@ -122,25 +122,30 @@ func (t *Ticketor) ModifyTicket(ctx context.Context, request *protogen.TicketReq
 		return nil, utils.StatusFromError(err)
 	}
 
-	// Deallocate existing ticket.
-	err = t.Sections.DeallocateSeat(ticket.Section, ticket.Number)
+	// Allocate new seat.
+	section, seat, err := t.Sections.ReallocateSeat(ticket.Section, ticket.Number)
 	if err != nil {
 		return nil, utils.StatusFromError(err)
 	}
 
-	// Allocate new seat.
-	section, seat, err := t.Sections.AllocateSeat()
-	if err != nil {
-		return nil, utils.StatusFromError(err)
+	from, to := request.GetFrom(), request.GetTo()
+
+	if from == "" {
+		from = ticket.From
+	}
+
+	if to == "" {
+		to = ticket.To
 	}
 
 	modified, err := t.Tickets.Modify(request.GetId(), models.Ticket{
 		ID:      request.GetId(),
-		From:    request.GetFrom(),
-		To:      request.GetTo(),
+		From:    from,
+		To:      to,
 		UserID:  ticket.UserID,
 		Section: section,
 		Number:  seat,
+		Price:   ticket.Price,
 	})
 	if err != nil {
 		return nil, utils.StatusFromError(err)

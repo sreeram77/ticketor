@@ -80,3 +80,29 @@ func (s *sections) DeallocateSeat(section, seat string) error {
 
 	return nil
 }
+
+func (s *sections) ReallocateSeat(section, seat string) (string, string, error) {
+	for k, v := range s.store {
+		sec := v.Occupancy
+		for j := range sec {
+			// 0 is ignored
+			if j == 0 {
+				continue
+			}
+
+			if !sec[j] {
+				sec[j] = true
+
+				// deallocate older seat.
+				err := s.DeallocateSeat(section, seat)
+				if err != nil {
+					return "", "", err
+				}
+
+				return k, strconv.Itoa(j), nil
+			}
+		}
+	}
+
+	return "", "", errors.ErrNotAvailable
+}
