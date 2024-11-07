@@ -1,113 +1,83 @@
 package store
 
 import (
+	"errors"
 	"testing"
 
-	"ticketor/errors"
+	intErrors "ticketor/errors"
 	"ticketor/models"
-
-	"github.com/golang/mock/gomock"
 )
 
 //go:generate mockgen -destination=./mock_users.go -package=store . Users
 
 func TestUsers_Create(t *testing.T) {
-	mockCtl := gomock.NewController(t)
-	defer mockCtl.Finish()
+	u := NewUsers()
 
-	mockUser := NewMockUsers(mockCtl)
-
-	user1 := models.User{
-		ID:        "1",
+	testUser := models.User{
 		FirstName: "John",
 		LastName:  "Doe",
-		Email:     "aaa@example.com",
+		Email:     "john@doe.com",
 	}
 
-	gomock.InOrder(
-		mockUser.EXPECT().Create(models.User{}).Return(models.User{}, nil),
-		mockUser.EXPECT().Create(user1).Return(user1, nil).Times(1),
-	)
-
-	_, err := mockUser.Create(models.User{})
+	got, err := u.Create(testUser)
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	created, err := mockUser.Create(user1)
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	if created.Email != user1.Email {
-		t.Errorf("expected %v, got %v", user1, created)
+	if got.Email != testUser.Email {
+		t.Errorf("expected %v, got %v", testUser, got)
 	}
 }
 
 func TestUsers_Get(t *testing.T) {
-	mockCtl := gomock.NewController(t)
-	defer mockCtl.Finish()
+	u := NewUsers()
 
-	mockUser := NewMockUsers(mockCtl)
-
-	user1 := models.User{
-		ID:        "1",
+	testUser := models.User{
 		FirstName: "John",
 		LastName:  "Doe",
-		Email:     "aaa@example.com",
+		Email:     "john@doe.com",
 	}
 
-	gomock.InOrder(
-		mockUser.EXPECT().Create(user1).Return(user1, nil).Times(1),
-		mockUser.EXPECT().Get("1").Return(user1, nil).Times(1),
-	)
-
-	created, err := mockUser.Create(user1)
+	created, err := u.Create(testUser)
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	got, err := mockUser.Get(created.ID)
+	got, err := u.Get(created.ID)
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	if got.Email != user1.Email {
-		t.Errorf("expected %v, got %v", user1, got)
+	if got.Email != testUser.Email {
+		t.Errorf("expected %v, got %v", testUser, got)
 	}
 }
 
 func TestUsers_Remove(t *testing.T) {
-	mockCtl := gomock.NewController(t)
-	defer mockCtl.Finish()
+	u := NewUsers()
 
-	mockUser := NewMockUsers(mockCtl)
-
-	user1 := models.User{
-		ID:        "1",
+	testUser := models.User{
 		FirstName: "John",
 		LastName:  "Doe",
-		Email:     "aaa@example.com",
+		Email:     "john@doe.com",
 	}
 
-	gomock.InOrder(
-		mockUser.EXPECT().Create(user1).Return(user1, nil).Times(1),
-		mockUser.EXPECT().Remove("1").Return(nil).Times(1),
-		mockUser.EXPECT().Get("1").Return(models.User{}, errors.ErrNotFound).Times(1),
-	)
-
-	created, err := mockUser.Create(user1)
+	created, err := u.Create(testUser)
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	err = mockUser.Remove(created.ID)
+	err = u.Remove(created.ID)
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	got, err := mockUser.Get(created.ID)
+	_, err = u.Get(created.ID)
 	if err == nil {
-		t.Errorf("expected error %v, got %v", errors.ErrNotFound, got)
+		t.Errorf("expected error, got nil")
+	}
+
+	if !errors.Is(err, intErrors.ErrNotFound) {
+		t.Errorf("expected %v, got %v", intErrors.ErrNotFound, err)
 	}
 }
