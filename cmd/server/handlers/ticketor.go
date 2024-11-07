@@ -2,15 +2,11 @@ package handlers
 
 import (
 	"context"
-	"errors"
 
-	intErrors "ticketor/errors"
 	"ticketor/models"
 	protogen "ticketor/protogen/proto"
 	"ticketor/store"
-
-	"google.golang.org/grpc/codes"
-	"google.golang.org/grpc/status"
+	"ticketor/utils"
 )
 
 type Ticketor struct {
@@ -34,12 +30,12 @@ func NewTicketor(users store.Users, sections store.Sections, tickets store.Ticke
 func (t *Ticketor) PurchaseTicket(ctx context.Context, request *protogen.TicketRequest) (*protogen.TicketReply, error) {
 	fetchedUser, err := t.Users.Get(request.GetUserId())
 	if err != nil {
-		return nil, statusFromError(err)
+		return nil, utils.StatusFromError(err)
 	}
 
 	section, seat, err := t.Sections.AllocateSeat()
 	if err != nil {
-		return nil, statusFromError(err)
+		return nil, utils.StatusFromError(err)
 	}
 
 	created, err := t.Tickets.Create(models.Ticket{
@@ -51,7 +47,7 @@ func (t *Ticketor) PurchaseTicket(ctx context.Context, request *protogen.TicketR
 		Price:   models.NewMoney(20),
 	})
 	if err != nil {
-		return nil, statusFromError(err)
+		return nil, utils.StatusFromError(err)
 	}
 
 	return &protogen.TicketReply{
@@ -75,12 +71,12 @@ func (t *Ticketor) PurchaseTicket(ctx context.Context, request *protogen.TicketR
 func (t *Ticketor) GetTicket(ctx context.Context, request *protogen.TicketIDRequest) (*protogen.TicketReply, error) {
 	ticket, err := t.Tickets.Get(request.GetId())
 	if err != nil {
-		return nil, statusFromError(err)
+		return nil, utils.StatusFromError(err)
 	}
 
 	user, err := t.Users.Get(ticket.UserID)
 	if err != nil {
-		return nil, statusFromError(err)
+		return nil, utils.StatusFromError(err)
 	}
 
 	return &protogen.TicketReply{
@@ -98,17 +94,17 @@ func (t *Ticketor) GetTicket(ctx context.Context, request *protogen.TicketIDRequ
 func (t *Ticketor) RemoveTicket(ctx context.Context, request *protogen.TicketIDRequest) (*protogen.Empty, error) {
 	ticket, err := t.Tickets.Get(request.GetId())
 	if err != nil {
-		return nil, statusFromError(err)
+		return nil, utils.StatusFromError(err)
 	}
 
 	err = t.Sections.DeallocateSeat(ticket.Section, ticket.Number)
 	if err != nil {
-		return nil, statusFromError(err)
+		return nil, utils.StatusFromError(err)
 	}
 
 	err = t.Tickets.Remove(request.GetId())
 	if err != nil {
-		return nil, statusFromError(err)
+		return nil, utils.StatusFromError(err)
 	}
 
 	return &protogen.Empty{}, nil
@@ -118,19 +114,19 @@ func (t *Ticketor) RemoveTicket(ctx context.Context, request *protogen.TicketIDR
 func (t *Ticketor) ModifyTicket(ctx context.Context, request *protogen.TicketRequest) (*protogen.TicketReply, error) {
 	ticket, err := t.Tickets.Get(request.GetId())
 	if err != nil {
-		return nil, statusFromError(err)
+		return nil, utils.StatusFromError(err)
 	}
 
 	// Deallocate existing ticket.
 	err = t.Sections.DeallocateSeat(ticket.Section, ticket.Number)
 	if err != nil {
-		return nil, statusFromError(err)
+		return nil, utils.StatusFromError(err)
 	}
 
 	// Allocate new seat.
 	section, seat, err := t.Sections.AllocateSeat()
 	if err != nil {
-		return nil, statusFromError(err)
+		return nil, utils.StatusFromError(err)
 	}
 
 	modified, err := t.Tickets.Modify(request.GetId(), models.Ticket{
@@ -142,7 +138,7 @@ func (t *Ticketor) ModifyTicket(ctx context.Context, request *protogen.TicketReq
 		Number:  seat,
 	})
 	if err != nil {
-		return nil, statusFromError(err)
+		return nil, utils.StatusFromError(err)
 	}
 
 	return &protogen.TicketReply{
@@ -163,16 +159,3 @@ func (t *Ticketor) ModifyTicket(ctx context.Context, request *protogen.TicketReq
 }
 
 func (t *Ticketor) mustEmbedUnimplementedTicketorServer() {}
-
-func statusFromError(err error) error {
-	switch {
-	case errors.Is(err, intErrors.ErrNotFound):
-		return status.Errorf(codes.NotFound, err.Error())
-	case errors.Is(err, intErrors.ErrInvalid):
-		return status.Errorf(codes.InvalidArgument, err.Error())
-	case errors.Is(err, intErrors.ErrNotAvailable):
-		return status.Errorf(codes.Internal, err.Error())
-	default:
-		return status.Errorf(codes.Unknown, err.Error())
-	}
-}
