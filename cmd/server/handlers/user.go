@@ -11,11 +11,11 @@ import (
 type user struct {
 	store store.Users
 
-	protogen.UnimplementedUserServer
+	protogen.UnimplementedUserServiceServer
 }
 
 // NewUser creates a new user handler.
-func NewUser(users store.Users) protogen.UserServer {
+func NewUser(users store.Users) protogen.UserServiceServer {
 	return &user{
 		store: users,
 	}

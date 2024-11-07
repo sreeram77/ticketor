@@ -19,7 +19,7 @@ message UserRequest {
   string email = 4;
 }
 
-service User {
+service UserService {
   rpc Get(UserIDRequest) returns (UserResponse) {}
   rpc Create(UserRequest) returns (UserResponse) {}
 }

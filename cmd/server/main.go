@@ -20,8 +20,12 @@ func main() {
 	var opts []grpc.ServerOption
 	grpcServer := grpc.NewServer(opts...)
 
-	ticketorHandler := handlers.NewTicketor(store.NewUsers(), store.NewSections(), store.NewTickets())
+	userStore := store.NewUsers()
 
+	ticketorHandler := handlers.NewTicketor(userStore, store.NewSections(), store.NewTickets())
+	userHandler := handlers.NewUser(userStore)
+
+	protogen.RegisterUserServiceServer(grpcServer, userHandler)
 	protogen.RegisterTicketorServer(grpcServer, ticketorHandler)
 
 	err = grpcServer.Serve(lis)

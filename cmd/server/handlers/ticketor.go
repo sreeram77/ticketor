@@ -32,7 +32,7 @@ func NewTicketor(users store.Users, sections store.Sections, tickets store.Ticke
 
 // PurchaseTicket creates a new ticket.
 func (t *Ticketor) PurchaseTicket(ctx context.Context, request *protogen.TicketRequest) (*protogen.TicketReply, error) {
-	user, err := t.Users.Get(request.GetUserId())
+	fetchedUser, err := t.Users.Get(request.GetUserId())
 	if err != nil {
 		return nil, statusFromError(err)
 	}
@@ -48,6 +48,7 @@ func (t *Ticketor) PurchaseTicket(ctx context.Context, request *protogen.TicketR
 		UserID:  request.GetUserId(),
 		Section: section,
 		Number:  seat,
+		Price:   models.NewMoney(20),
 	})
 	if err != nil {
 		return nil, statusFromError(err)
@@ -55,15 +56,15 @@ func (t *Ticketor) PurchaseTicket(ctx context.Context, request *protogen.TicketR
 
 	return &protogen.TicketReply{
 		Id:     created.ID,
-		UserId: user.ID,
+		UserId: fetchedUser.ID,
 		User: &protogen.User{
-			Id:        user.ID,
-			FirstName: user.FirstName,
-			LastName:  user.LastName,
-			Email:     user.Email,
+			Id:        fetchedUser.ID,
+			FirstName: fetchedUser.FirstName,
+			LastName:  fetchedUser.LastName,
+			Email:     fetchedUser.Email,
 		},
 		Number:  created.Number,
-		Section: created.Number,
+		Section: created.Section,
 		From:    created.From,
 		To:      created.To,
 		Price:   created.Price.String(),
