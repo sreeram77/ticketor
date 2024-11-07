@@ -3,9 +3,11 @@ package handlers
 import (
 	"context"
 
+	"ticketor/errors"
 	"ticketor/models"
 	protogen "ticketor/protogen/proto"
 	"ticketor/store"
+	"ticketor/utils"
 )
 
 type user struct {
@@ -38,6 +40,11 @@ func (u *user) Get(ctx context.Context, request *protogen.UserIDRequest) (*proto
 
 // Create creates a new user.
 func (u *user) Create(ctx context.Context, request *protogen.UserRequest) (*protogen.UserResponse, error) {
+	err := validateUser(request)
+	if err != nil {
+		return nil, err
+	}
+
 	created, err := u.store.Create(models.User{
 		FirstName: request.GetFirstName(),
 		LastName:  request.GetLastName(),
@@ -53,6 +60,18 @@ func (u *user) Create(ctx context.Context, request *protogen.UserRequest) (*prot
 		LastName:  created.LastName,
 		Email:     created.Email,
 	}, nil
+}
+
+func validateUser(request *protogen.UserRequest) error {
+	if request.GetEmail() == "" || request.GetFirstName() == "" || request.GetLastName() == "" {
+		return errors.ErrInvalid
+	}
+
+	if !utils.CheckEmail(request.GetEmail()) {
+		return errors.ErrInvalid
+	}
+
+	return nil
 }
 
 func (u *user) mustEmbedUnimplementedUserServer() {}
