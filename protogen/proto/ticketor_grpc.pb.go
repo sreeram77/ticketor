@@ -23,6 +23,7 @@ const (
 	Ticketor_GetTicket_FullMethodName      = "/Ticketor/GetTicket"
 	Ticketor_RemoveTicket_FullMethodName   = "/Ticketor/RemoveTicket"
 	Ticketor_ModifyTicket_FullMethodName   = "/Ticketor/ModifyTicket"
+	Ticketor_GetTickets_FullMethodName     = "/Ticketor/GetTickets"
 )
 
 // TicketorClient is the client API for Ticketor service.
@@ -33,6 +34,7 @@ type TicketorClient interface {
 	GetTicket(ctx context.Context, in *TicketIDRequest, opts ...grpc.CallOption) (*TicketReply, error)
 	RemoveTicket(ctx context.Context, in *TicketIDRequest, opts ...grpc.CallOption) (*Empty, error)
 	ModifyTicket(ctx context.Context, in *TicketRequest, opts ...grpc.CallOption) (*TicketReply, error)
+	GetTickets(ctx context.Context, in *SectionIDRequest, opts ...grpc.CallOption) (*TicketsReply, error)
 }
 
 type ticketorClient struct {
@@ -83,6 +85,16 @@ func (c *ticketorClient) ModifyTicket(ctx context.Context, in *TicketRequest, op
 	return out, nil
 }
 
+func (c *ticketorClient) GetTickets(ctx context.Context, in *SectionIDRequest, opts ...grpc.CallOption) (*TicketsReply, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(TicketsReply)
+	err := c.cc.Invoke(ctx, Ticketor_GetTickets_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // TicketorServer is the server API for Ticketor service.
 // All implementations must embed UnimplementedTicketorServer
 // for forward compatibility.
@@ -91,6 +103,7 @@ type TicketorServer interface {
 	GetTicket(context.Context, *TicketIDRequest) (*TicketReply, error)
 	RemoveTicket(context.Context, *TicketIDRequest) (*Empty, error)
 	ModifyTicket(context.Context, *TicketRequest) (*TicketReply, error)
+	GetTickets(context.Context, *SectionIDRequest) (*TicketsReply, error)
 	mustEmbedUnimplementedTicketorServer()
 }
 
@@ -112,6 +125,9 @@ func (UnimplementedTicketorServer) RemoveTicket(context.Context, *TicketIDReques
 }
 func (UnimplementedTicketorServer) ModifyTicket(context.Context, *TicketRequest) (*TicketReply, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method ModifyTicket not implemented")
+}
+func (UnimplementedTicketorServer) GetTickets(context.Context, *SectionIDRequest) (*TicketsReply, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetTickets not implemented")
 }
 func (UnimplementedTicketorServer) mustEmbedUnimplementedTicketorServer() {}
 func (UnimplementedTicketorServer) testEmbeddedByValue()                  {}
@@ -206,6 +222,24 @@ func _Ticketor_ModifyTicket_Handler(srv interface{}, ctx context.Context, dec fu
 	return interceptor(ctx, in, info, handler)
 }
 
+func _Ticketor_GetTickets_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(SectionIDRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(TicketorServer).GetTickets(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Ticketor_GetTickets_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(TicketorServer).GetTickets(ctx, req.(*SectionIDRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // Ticketor_ServiceDesc is the grpc.ServiceDesc for Ticketor service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -228,6 +262,10 @@ var Ticketor_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "ModifyTicket",
 			Handler:    _Ticketor_ModifyTicket_Handler,
+		},
+		{
+			MethodName: "GetTickets",
+			Handler:    _Ticketor_GetTickets_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

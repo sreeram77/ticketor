@@ -7,6 +7,15 @@ service Ticketor {
   rpc GetTicket(TicketIDRequest) returns (TicketReply) {}
   rpc RemoveTicket(TicketIDRequest) returns (Empty) {}
   rpc ModifyTicket(TicketRequest) returns (TicketReply) {}
+  rpc GetTickets(SectionIDRequest) returns (TicketsReply) {}
+}
+
+message SectionIDRequest {
+  string id = 1;
+}
+
+message TicketsReply {
+  repeated TicketReply tickets = 1;
 }
 
 message TicketRequest {
