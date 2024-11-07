@@ -9,6 +9,10 @@ message UserResponse {
   string email = 4;
 }
 
+message UserIDRequest {
+  string id = 1;
+}
+
 message UserRequest {
   string firstName = 2;
   string lastName = 3;
@@ -16,6 +20,6 @@ message UserRequest {
 }
 
 service User {
-  rpc Get(UserRequest) returns (UserResponse) {}
+  rpc Get(UserIDRequest) returns (UserResponse) {}
   rpc Create(UserRequest) returns (UserResponse) {}
 }

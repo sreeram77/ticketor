@@ -27,7 +27,7 @@ const (
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type UserClient interface {
-	Get(ctx context.Context, in *UserRequest, opts ...grpc.CallOption) (*UserResponse, error)
+	Get(ctx context.Context, in *UserIDRequest, opts ...grpc.CallOption) (*UserResponse, error)
 	Create(ctx context.Context, in *UserRequest, opts ...grpc.CallOption) (*UserResponse, error)
 }
 
@@ -39,7 +39,7 @@ func NewUserClient(cc grpc.ClientConnInterface) UserClient {
 	return &userClient{cc}
 }
 
-func (c *userClient) Get(ctx context.Context, in *UserRequest, opts ...grpc.CallOption) (*UserResponse, error) {
+func (c *userClient) Get(ctx context.Context, in *UserIDRequest, opts ...grpc.CallOption) (*UserResponse, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
 	out := new(UserResponse)
 	err := c.cc.Invoke(ctx, User_Get_FullMethodName, in, out, cOpts...)
@@ -63,7 +63,7 @@ func (c *userClient) Create(ctx context.Context, in *UserRequest, opts ...grpc.C
 // All implementations must embed UnimplementedUserServer
 // for forward compatibility.
 type UserServer interface {
-	Get(context.Context, *UserRequest) (*UserResponse, error)
+	Get(context.Context, *UserIDRequest) (*UserResponse, error)
 	Create(context.Context, *UserRequest) (*UserResponse, error)
 	mustEmbedUnimplementedUserServer()
 }
@@ -75,7 +75,7 @@ type UserServer interface {
 // pointer dereference when methods are called.
 type UnimplementedUserServer struct{}
 
-func (UnimplementedUserServer) Get(context.Context, *UserRequest) (*UserResponse, error) {
+func (UnimplementedUserServer) Get(context.Context, *UserIDRequest) (*UserResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Get not implemented")
 }
 func (UnimplementedUserServer) Create(context.Context, *UserRequest) (*UserResponse, error) {
@@ -103,7 +103,7 @@ func RegisterUserServer(s grpc.ServiceRegistrar, srv UserServer) {
 }
 
 func _User_Get_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(UserRequest)
+	in := new(UserIDRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
@@ -115,7 +115,7 @@ func _User_Get_Handler(srv interface{}, ctx context.Context, dec func(interface{
 		FullMethod: User_Get_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(UserServer).Get(ctx, req.(*UserRequest))
+		return srv.(UserServer).Get(ctx, req.(*UserIDRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
