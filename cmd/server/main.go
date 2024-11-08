@@ -14,7 +14,7 @@ import (
 func main() {
 	lis, err := net.Listen("tcp", ":8000")
 	if err != nil {
-		slog.Error("failed to listen: %v", err)
+		slog.Error("failed to listen", "err", err)
 	}
 
 	var opts []grpc.ServerOption
@@ -30,6 +30,6 @@ func main() {
 
 	err = grpcServer.Serve(lis)
 	if err != nil {
-		slog.Error("failed to serve: %v", err)
+		slog.Error("failed to serve", "err", err)
 	}
 }
