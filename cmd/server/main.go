@@ -3,6 +3,7 @@ package main
 import (
 	"log/slog"
 	"net"
+	"os"
 
 	"ticketor/cmd/server/handlers"
 	protogen "ticketor/protogen/proto"
@@ -12,6 +13,12 @@ import (
 )
 
 func main() {
+	slog.SetLogLoggerLevel(slog.LevelDebug)
+	slog.SetDefault(slog.New(slog.NewTextHandler(os.Stdout, &slog.HandlerOptions{
+		AddSource: true,
+		Level:     slog.LevelDebug,
+	})))
+
 	lis, err := net.Listen("tcp", ":8000")
 	if err != nil {
 		slog.Error("failed to listen", "err", err)
