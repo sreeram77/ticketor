@@ -23,6 +23,10 @@ go test -v ./...
 ## Run Server
 ```bash
 go run cmd/server/main.go
+
+# or use Docker
+docker build -t ticketor . && docker run -p 8000:8000 -d ticketor
+
 ```
 
 ## Run Client
